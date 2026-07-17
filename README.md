@@ -13,3 +13,5 @@ claude fable 5 says this matches no known file format. if anyone can identify it
 not sharing full files for now, they are big and i am still converting them.
 
 added a script the llm wrote that checks the structure, run it on the samples: python3 parse_btcx.py 20180213_0417.bin
+
+update: fable changed the script a bit, added a scan that looks for structured parts inside the streams. doesnt flag anything on these two samples, i think theyre just too small (its only the first 4kb).

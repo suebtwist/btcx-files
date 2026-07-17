@@ -6,6 +6,8 @@
 #
 # it checks the 16 byte header, looks for the repeating structure,
 # splits the body into interleaved streams and reports what it finds.
+# v1.1: fable added a window scan that checks each payload stream for
+# structured regions (entropy dips). finds nothing on the 4kb samples.
 # it does NOT render frames. the renderer needs the full file and runs
 # separately (its slow).
 
@@ -33,6 +35,34 @@ def lag_match_rate(data: bytes, lag: int) -> float:
         return 0.0
     hits = sum(1 for i in range(n) if data[i] == data[i + lag])
     return hits / n
+
+
+def window_scan(stream: bytes, k: int, lag: int) -> list:
+    # fable says: entropy of a small window is naturally lower than the
+    # whole stream (only 64 samples), so compare each window against the
+    # MEDIAN of all windows in the same stream, not the stream figure.
+    win, step = 64, 32
+    if len(stream) < win * 3:
+        return []
+    ents = []
+    for p in range(0, len(stream) - win, step):
+        ents.append((p, entropy_bits(stream[p:p + win])))
+    med = sorted(e for _, e in ents)[len(ents) // 2]
+    first_abs = HEADER_LEN + ((k - HEADER_LEN) % lag)
+    hits = []
+    for (p, e) in ents:
+        if e < med - 0.8:
+            a0 = first_abs + p * lag
+            a1 = first_abs + (p + win) * lag
+            hits.append((a0, a1, e, med))
+    merged = []
+    for h in hits:
+        if merged and h[0] <= merged[-1][1]:
+            m = merged[-1]
+            merged[-1] = (m[0], h[1], min(m[2], h[2]), m[3])
+        else:
+            merged.append(h)
+    return merged
 
 
 def main(path: str) -> None:
@@ -96,6 +126,20 @@ def main(path: str) -> None:
         else:
             desc = "mixed"
         print(f"  stream {k}: {len(s):5d} bytes  entropy {e:5.2f} bits/byte  {desc}")
+
+    # ---- window scan (v1.1) ----
+    print("-" * 56)
+    print("window scan: checking payload streams for structured regions...")
+    found = 0
+    for k, s in enumerate(streams):
+        sb = bytes(s)
+        for (a0, a1, e, med) in window_scan(sb, k, best_lag):
+            found += 1
+            print(f"  stream {k}: LOW entropy region, file offsets "
+                  f"{a0}..{a1} ({e:.2f} vs window median {med:.2f}) "
+                  f"<- structured region?")
+    if not found:
+        print("  none found. payload looks uniform in this sample.")
 
     # ---- frame reconstruction (stage 2 stub) ----
     print("-" * 56)
