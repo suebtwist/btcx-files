@@ -17,3 +17,5 @@ added a script the llm wrote that checks the structure, run it on the samples: p
 update: fable changed the script a bit, added a scan that looks for structured parts inside the streams. doesnt flag anything on these two samples, i think theyre just too small (its only the first 4kb).
 
 update: changed the conversion script to do a slower pass on fine detail. re ran file 003 since its the shortest and it wrote out a middle step file instead of getting to the render, says its the recovered surface data. its here as 003_state.bin. i cant read it. still converting the rest in order.
+
+update: someone asked for more than the first 4kb so here is the first 8kb of the same two files (20180213_0417_8k.bin, 20180219_2258_8k.bin). the first 4kb is identical to the older samples if you want to diff them. still not uploading full files, theyre 2tb.
