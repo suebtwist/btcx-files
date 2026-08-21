@@ -21,3 +21,7 @@ update: changed the conversion script to do a slower pass on fine detail. re ran
 update: someone asked for more than the first 4kb so here is the first 8kb of the same two files (20180213_0417_8k.bin, 20180219_2258_8k.bin). the first 4kb is identical to the older samples if you want to diff them. still not uploading full files, theyre 2tb.
 
 update: file 62 is one of the ones that never converted correctly. here is the first 25mb in case anyone can tell me anything.
+
+update: ran the slow pass on file 306. it didnt render. it wrote out 306_state.bin and then kept waiting. this is the whole state file, unchanged. i cant read it.
+
+sha256: d5c379bc98667f7274a8b87f006ff6ce1425a7d3f500a12373a85def931946e9
